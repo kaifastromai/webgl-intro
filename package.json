@@ -1,0 +1,27 @@
+{
+  "name": "webgl-intro",
+  "version": "0.0.1",
+  "description": "webgl",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaifastromai/webgl-intro.git"
+  },
+  "keywords": [
+    "webgl"
+  ],
+  "author": "kaifas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaifastromai/webgl-intro/issues"
+  },
+  "homepage": "https://github.com/kaifastromai/webgl-intro#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1"
+  }
+}
