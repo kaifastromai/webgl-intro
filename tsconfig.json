@@ -2,6 +2,8 @@
     "compilerOptions": {
         "module": "ESNext",
         "target": "ESNext",
+        "outDir": "build",
+        "watch": true,
         "noImplicitAny": true,
         "strictNullChecks": false,
         "sourceMap": true,

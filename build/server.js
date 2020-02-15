@@ -1,5 +1,4 @@
-"use strict";
-var http = require('http');
+import * as http from 'http';
 var fs = require('fs');
 var serveStatic = require('serve-static');
 var finalHandler = require('finalhandler');
