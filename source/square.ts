@@ -1,6 +1,5 @@
-import { vec3, vec4 } from 'gl-matrix'
-import { gl } from './imports';
-import { color_shader, solid_shader } from './shader_utils';
+import { gl, vec4 } from './imports.js';
+import { color_shader, solid_shader } from './shader_utils.js';
 class Square {
     vao_s: WebGLVertexArrayObject;
     vao_l: WebGLVertexArrayObject;
@@ -31,7 +30,7 @@ class Square {
 
         this.colors = [1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1];
         this.filled_indices = [0, 3, 2, 0, 2, 1];
-        this.line_segment_indices = [0, 1, 1, 2, 2, 3, 3, 0, 2,]
+        this.line_segment_indices = [0, 1, 1, 2, 2, 3, 3, 0, 2,];
 
         gl.bindVertexArray(this.vao_s);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vrts_buffer);
@@ -61,7 +60,7 @@ class Square {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.lindx_buffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.line_segment_indices), gl.STATIC_DRAW);
 
-		/*	This unbinding of the VAO is necessary.
+        /*	This unbinding of the VAO is necessary.
 		*/
 
         gl.bindVertexArray(null);
@@ -96,4 +95,4 @@ class Square {
         gl.useProgram(null);
     }
 }
-export { Square }
+export { Square };

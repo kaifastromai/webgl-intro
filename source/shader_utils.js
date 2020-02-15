@@ -1,5 +1,5 @@
-import { gl } from './imports';
-import { solid_color_shader, index_color_shader } from './shader_source';
+import { gl } from './imports.js';
+import { solid_color_shader, index_color_shader } from './shader_source.js';
 class Shader {
     constructor() {
         this.program = null;
@@ -36,7 +36,6 @@ class Shader {
 }
 var solid_shader = new Shader();
 var color_shader = new Shader();
-color_shader.attribs.a_colors = 0;
 function InitializeSolidColorShader() {
     solid_shader.vertexText = solid_color_shader.vrtx;
     solid_shader.fragmentText = solid_color_shader.frag;

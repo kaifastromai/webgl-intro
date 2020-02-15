@@ -1,4 +1,4 @@
-import { loadTextResource } from './utilities';
+import { loadTextResource } from './utilities.js';
 
 //The Indexed color shader is a UNLIT shader feeding vertex colors as attributes
 
@@ -29,7 +29,7 @@ var InitShaders = (vert_url: string, frag_url: string, shader: IColorShader) => 
         else {
             loadTextResource(frag_url, (fsErr: string, fsText:string): void => {
                 if (fsErr) {
-                    alert('Fatal error getting vertex shader, see console');
+                    alert('Fatal error getting fragment shader, see console');
                     console.error(fsErr);
                 }
                 else {
@@ -40,9 +40,10 @@ var InitShaders = (vert_url: string, frag_url: string, shader: IColorShader) => 
             });
         }
     });
-    InitShaders('./solid_color_shader.vert', './solid_color_shader.frag', solid_color_shader);
-    InitShaders('./index_color_shader.vert', './index_color_shader.frag', index_color_shader);
-
+   
 
 };
+InitShaders('./shaders/solid_color_shader.vert', './shaders/solid_color_shader.frag', solid_color_shader);
+InitShaders('./shaders/index_color_shader.vert', './shaders/index_color_shader.frag', index_color_shader);
+
 export{solid_color_shader,index_color_shader};

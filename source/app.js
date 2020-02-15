@@ -1,19 +1,17 @@
-import { ct, gl, glcanvas, mat4, vec3, vec4, vec2, } from './imports';
-import { radiansToDegrees, degreesToRadians } from './utilities';
-import './shader_utils';
-import { Axes } from './axes';
-import { Square } from './square';
-import { InitializeIndexedColorShader, InitializeSolidColorShader } from './shader_utils';
+import { ct, gl, glcanvas, mat4, vec3, vec4, vec2, glMatrix, } from './imports.js';
+import { radiansToDegrees, degreesToRadians } from './utilities.js';
+import './shader_utils.js';
+import { Axes } from './axes.js';
+import { Square } from './square.js';
+import { InitializeIndexedColorShader, InitializeSolidColorShader } from './shader_utils.js';
 //Server init
 //Globals
 const near_plane = 1;
 const far_plane = 100;
 let wireframe = false;
-const axes = new Axes();
-const square = new Square();
-var x_axis = vec3.fromValues(1, 0, 0);
-var y_axis = vec3.fromValues(0, 1, 0);
-var z_axis = vec3.fromValues(0, 0, 1);
+var x_axis = glMatrix.vec3.fromValues(1, 0, 0);
+var y_axis = glMatrix.vec3.fromValues(0, 1, 0);
+var z_axis = glMatrix.vec3.fromValues(0, 0, 1);
 // Methods
 function DrawScene(now) {
     now /= 1000;
@@ -66,9 +64,14 @@ document.addEventListener('keydown', (event) => {
         wireframe = !wireframe;
     }
 });
+function RunApp() {
+    console.log('It works');
+}
 InitCT();
 InitializeIndexedColorShader();
 InitializeSolidColorShader();
 requestAnimationFrame(DrawScene);
-export { DrawScene };
+const axes = new Axes();
+const square = new Square();
+export { DrawScene, RunApp };
 //# sourceMappingURL=app.js.map

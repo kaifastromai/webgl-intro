@@ -1,6 +1,6 @@
-import './utilities';
-import { gl } from './imports';
-import { color_shader } from './shader_utils';
+import './utilities.js';
+import { gl } from './imports.js';
+import { color_shader } from './shader_utils.js';
 class Axes {
     constructor() {
         this.vao = gl.createVertexArray();
@@ -8,6 +8,7 @@ class Axes {
         this.indx_buffer = gl.createBuffer();
         this.colr_buffer = gl.createBuffer();
         //Displaced a tiny amount in z to avoid z-fighting
+        this.verts = [];
         this.zOffset = 0.004;
         this.verts.push(0, 0, this.zOffset);
         this.verts.push(1, 0, this.zOffset);
@@ -32,7 +33,7 @@ class Axes {
         gl.bindVertexArray(null);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-        console.log("Axes: ");
+        console.log('Axes: ');
         console.log('Vertex buffer' + this.vrts_buffer);
         console.log('Vertices: ' + this.verts);
         console.log('VAO: ' + this.vao);

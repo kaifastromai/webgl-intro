@@ -1,4 +1,4 @@
-import './utilities';
+import './utilities.js';
 declare class Axes {
     vao: WebGLVertexArrayObject;
     vrts_buffer: WebGLBuffer;

@@ -1,4 +1,4 @@
-import { loadTextResource } from './utilities';
+import { loadTextResource } from './utilities.js';
 var index_color_shader = {
     vrtx: '',
     frag: ''
@@ -17,7 +17,7 @@ var InitShaders = (vert_url, frag_url, shader) => {
         else {
             loadTextResource(frag_url, (fsErr, fsText) => {
                 if (fsErr) {
-                    alert('Fatal error getting vertex shader, see console');
+                    alert('Fatal error getting fragment shader, see console');
                     console.error(fsErr);
                 }
                 else {
@@ -28,8 +28,8 @@ var InitShaders = (vert_url, frag_url, shader) => {
             });
         }
     });
-    InitShaders('./solid_color_shader.vert', './solid_color_shader.frag', solid_color_shader);
-    InitShaders('./index_color_shader.vert', './index_color_shader.frag', index_color_shader);
 };
+InitShaders('./shaders/solid_color_shader.vert', './shaders/solid_color_shader.frag', solid_color_shader);
+InitShaders('./shaders/index_color_shader.vert', './shaders/index_color_shader.frag', index_color_shader);
 export { solid_color_shader, index_color_shader };
 //# sourceMappingURL=shader_source.js.map

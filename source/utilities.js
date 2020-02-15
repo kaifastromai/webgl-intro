@@ -6,10 +6,10 @@ function degreesToRadians(angle_in_radians) {
 }
 var loadTextResource = function (url, callback) {
     var req = new XMLHttpRequest();
-    req.open("GET", url, true);
+    req.open('GET', url, true);
     req.onload = function () {
         if (req.status < 200 || req.status > 299) {
-            callback("Erro: HTTP Status" + req.status + "on resource" + url, null);
+            callback('Erro: HTTP Status' + req.status + 'on resource' + url, null);
         }
         else {
             callback(null, req.responseText);

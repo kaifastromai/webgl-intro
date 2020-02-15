@@ -1,6 +1,5 @@
-import { vec4 } from 'gl-matrix';
-import { gl } from './imports';
-import { color_shader, solid_shader } from './shader_utils';
+import { gl, vec4 } from './imports.js';
+import { color_shader, solid_shader } from './shader_utils.js';
 class Square {
     constructor() {
         //One VAO for shades

@@ -1,6 +1,6 @@
 //import * as glMatrix from 'gl-matrix';
-import * as glMatrix from 'gl-matrix';
-const vec2 = glMatrix.vec2;
+import * as glMatrix from './gl-matrix-min.js';
+const vec2 = glMatrix.vec3;
 const vec3 = glMatrix.vec3;
 const vec4 = glMatrix.vec4;
 const mat4 = glMatrix.mat4;

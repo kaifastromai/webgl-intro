@@ -9,10 +9,10 @@ interface IRequestCallback {
 }
 var loadTextResource = function (url: string, callback: IRequestCallback) {
     var req = new XMLHttpRequest();
-    req.open("GET", url, true);
+    req.open('GET', url, true);
     req.onload = function (): void {
         if (req.status < 200 || req.status > 299) {
-            callback("Erro: HTTP Status" + req.status + "on resource" + url, null);
+            callback('Erro: HTTP Status' + req.status + 'on resource' + url, null);
         } else {
             callback(null, req.responseText);
         }
