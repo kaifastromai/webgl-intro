@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+</head>
+
+<body "onload="" style="background-color: #404040;">
+
+    <script src='./imports.js' type='module'></script>
+    <script src='./shader_utils.js' type='module'></script>
+    <script src='./utilities.js' type='module'></script>
+    <script src='./axes.js' type='module'></script>
+    <script src='./shader_source.js' type='module'></script>
+    <script src='./square.js' type='module'></script>
+    <script src='./app.js' type='module'></script>
+
+    <div style="position: relative;">
+        <canvas id="txcanvas" width="1280" height="768"
+            style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+        <canvas id="glcanvas" width="1280" height="768"
+            style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
+    </div>
+</body>
+
+</html>
