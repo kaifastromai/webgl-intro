@@ -1,5 +1,5 @@
 import { gl } from './imports.js';
-import { solid_color_shader, index_color_shader } from './shader_source.js';
+import { InitShaders } from './shader_source.js';
 class Shader {
     constructor() {
         this.program = null;
@@ -36,7 +36,13 @@ class Shader {
 }
 var solid_shader = new Shader();
 var color_shader = new Shader();
-function InitializeSolidColorShader() {
+color_shader.attribs = {
+    a_vertex_coordinates: null,
+};
+async function InitializeSolidColorShader() {
+    let solid_color_shader;
+    let shader = await InitShaders('./shaders/solid_color_shader.vert', './shaders/solid_color_shader.frag');
+    solid_color_shader = shader;
     solid_shader.vertexText = solid_color_shader.vrtx;
     solid_shader.fragmentText = solid_color_shader.frag;
     solid_shader.CreateShader();
@@ -53,7 +59,10 @@ function InitializeSolidColorShader() {
     console.log('P Matrix handle: ' + solid_shader.uniforms.u_pj);
     console.log('Color handle: ' + solid_shader.uniforms.u_color);
 }
-function InitializeIndexedColorShader() {
+async function InitializeIndexedColorShader() {
+    let index_color_shader;
+    let shader = await InitShaders('./shaders/index_color_shader.vert', './shaders/index_color_shader.frag');
+    index_color_shader = shader;
     color_shader.vertexText = index_color_shader.vrtx;
     color_shader.fragmentText = index_color_shader.frag;
     color_shader.CreateShader();

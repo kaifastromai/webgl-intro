@@ -1,4 +1,4 @@
-import { ct, gl, glcanvas, mat4, vec3, vec4, vec2, glMatrix, } from './imports.js';
+import { ct, gl, glcanvas, mat4, vec3, vec4, vec2, } from './imports.js';
 import { radiansToDegrees, degreesToRadians } from './utilities.js';
 import './shader_utils.js';
 import { Axes } from './axes.js';
@@ -9,9 +9,9 @@ import { InitializeIndexedColorShader, InitializeSolidColorShader } from './shad
 const near_plane = 1;
 const far_plane = 100;
 let wireframe = false;
-var x_axis = glMatrix.vec3.fromValues(1, 0, 0);
-var y_axis = glMatrix.vec3.fromValues(0, 1, 0);
-var z_axis = glMatrix.vec3.fromValues(0, 0, 1);
+// var x_axis = glMatrix.vec3.fromValues(1, 0, 0);
+// var y_axis = glMatrix.vec3.fromValues(0, 1, 0);
+var z_axis = [0, 0, 1];
 // Methods
 function DrawScene(now) {
     now /= 1000;

@@ -1,9 +1,9 @@
 import { gl } from './imports.js';
-import { solid_color_shader, index_color_shader } from './shader_source.js';
+import { InitShaders, IColorShader } from './shader_source.js';
 class Shader {
     program: WebGLProgram;
-    uniforms?: { [k: string]: WebGLUniformLocation };
-    attribs?: { [k: string]: number };
+    uniforms?: { [k: string]: WebGLUniformLocation; };
+    attribs?: { [k: string]: number; };
     vertexText: string;
     fragmentText: string;
     constructor() {
@@ -38,13 +38,20 @@ class Shader {
         success = gl.getProgramParameter(shaderProgram, gl.LINK_STATUS);
         if (!success)
             throw ('Shader program failed to link: ' + gl.getProgramInfoLog(shaderProgram));
-        this.program= shaderProgram;
+        this.program = shaderProgram;
     }
 
 }
+
 var solid_shader = new Shader();
 var color_shader = new Shader();
-function InitializeSolidColorShader():void {
+color_shader.attribs = {
+    a_vertex_coordinates: null,
+};
+async function InitializeSolidColorShader() {
+    let solid_color_shader: IColorShader;
+    let shader = await InitShaders('./shaders/solid_color_shader.vert', './shaders/solid_color_shader.frag');
+    solid_color_shader = shader;
     solid_shader.vertexText = solid_color_shader.vrtx;
     solid_shader.fragmentText = solid_color_shader.frag;
     solid_shader.CreateShader();
@@ -55,7 +62,7 @@ function InitializeSolidColorShader():void {
     solid_shader.uniforms.u_pj = gl.getUniformLocation(solid_shader.program, 'u_pj');
     solid_shader.uniforms.u_color = gl.getUniformLocation(solid_shader.program, 'u_color');
     gl.useProgram(null);
-    
+
     console.log('Vertex Coordinate handle: ' + solid_shader.attribs.a_vertex_coordinates);
     console.log('M Matrix handle: ' + solid_shader.uniforms.u_m);
     console.log('V Matrix handle: ' + solid_shader.uniforms.u_v);
@@ -63,7 +70,10 @@ function InitializeSolidColorShader():void {
     console.log('Color handle: ' + solid_shader.uniforms.u_color);
 }
 
-function InitializeIndexedColorShader():void {
+async function InitializeIndexedColorShader() {
+    let index_color_shader: any;
+    let shader = await InitShaders('./shaders/index_color_shader.vert', './shaders/index_color_shader.frag');
+    index_color_shader = shader;
     color_shader.vertexText = index_color_shader.vrtx;
     color_shader.fragmentText = index_color_shader.frag;
     color_shader.CreateShader();
@@ -83,4 +93,4 @@ function InitializeIndexedColorShader():void {
 }
 
 export { Shader };
-export { solid_shader, color_shader,InitializeSolidColorShader,InitializeIndexedColorShader};
+export { solid_shader, color_shader, InitializeSolidColorShader, InitializeIndexedColorShader };

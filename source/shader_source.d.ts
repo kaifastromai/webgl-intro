@@ -1,9 +1,6 @@
-declare var index_color_shader: {
+interface IColorShader {
     vrtx: string;
     frag: string;
-};
-declare var solid_color_shader: {
-    vrtx: string;
-    frag: string;
-};
-export { solid_color_shader, index_color_shader };
+}
+declare function InitShaders(vert_url: string, frag_url: string): Promise<IColorShader>;
+export { InitShaders, IColorShader };

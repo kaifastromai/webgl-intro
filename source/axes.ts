@@ -1,6 +1,6 @@
 
 import './utilities.js';
-import { gl, vec3, glMatrix } from './imports.js';
+import { gl } from './imports.js';
 import { color_shader } from './shader_utils.js';
 class Axes {
     vao: WebGLVertexArrayObject;

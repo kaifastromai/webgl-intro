@@ -13,7 +13,7 @@ declare class Shader {
 }
 declare var solid_shader: Shader;
 declare var color_shader: Shader;
-declare function InitializeSolidColorShader(): void;
-declare function InitializeIndexedColorShader(): void;
+declare function InitializeSolidColorShader(): Promise<void>;
+declare function InitializeIndexedColorShader(): Promise<void>;
 export { Shader };
 export { solid_shader, color_shader, InitializeSolidColorShader, InitializeIndexedColorShader };

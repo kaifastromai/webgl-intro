@@ -7,17 +7,8 @@ function degreesToRadians(angle_in_radians: number): number {
 interface IRequestCallback {
     (error: string, response: string): void;
 }
-var loadTextResource = function (url: string, callback: IRequestCallback) {
-    var req = new XMLHttpRequest();
-    req.open('GET', url, true);
-    req.onload = function (): void {
-        if (req.status < 200 || req.status > 299) {
-            callback('Erro: HTTP Status' + req.status + 'on resource' + url, null);
-        } else {
-            callback(null, req.responseText);
-        }
-    };
-    req.send();
-};
-
-export { degreesToRadians, radiansToDegrees, loadTextResource, IRequestCallback };
+async function loadFileAsync(path: string): Promise<string> {
+    let res = await fetch(path);
+    return await res.text();
+}
+export { degreesToRadians, radiansToDegrees, loadFileAsync, IRequestCallback };

@@ -1,6 +1,6 @@
 
 import {
-    ct, gl, glcanvas, mat4, vec3, vec4, vec2, glMatrix,
+    ct, gl, glcanvas, mat4, vec3, vec4, vec2, glMatrix, glm,
 } from './imports.js';
 import { radiansToDegrees, degreesToRadians } from './utilities.js';
 import './shader_utils.js';
@@ -14,9 +14,9 @@ const near_plane: number = 1;
 const far_plane: number = 100;
 let wireframe = false;
 
-var x_axis = glMatrix.vec3.fromValues(1, 0, 0);
-var y_axis = glMatrix.vec3.fromValues(0, 1, 0);
-var z_axis = glMatrix.vec3.fromValues(0, 0, 1);
+// var x_axis = glMatrix.vec3.fromValues(1, 0, 0);
+// var y_axis = glMatrix.vec3.fromValues(0, 1, 0);
+var z_axis = [0, 0, 1];
 
 // Methods
 
@@ -85,12 +85,12 @@ function RunApp() {
 }
 
 InitCT();
-InitializeIndexedColorShader();
+InitializeIndexedColorShader()
 InitializeSolidColorShader();
 requestAnimationFrame(DrawScene);
 
 const axes = new Axes();
 const square = new Square();
 
-export { DrawScene,RunApp };
+export { DrawScene, RunApp };
 
