@@ -1,0 +1,49 @@
+{
+  "name": "p1_disk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "@types/gl-matrix": "^2.4.5",
+    "@types/node": "^13.7.4",
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "^10.0.0",
+    "browserify": "^16.5.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.1",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "finalhandler": "^1.1.2",
+    "gl-matrix": "^3.2.1",
+    "grunt": "^1.0.4",
+    "grunt-browserify": "^5.3.0",
+    "grunt-cli": "^1.3.2",
+    "node": "^13.8.0",
+    "node-static": "^0.7.11",
+    "serve-static": "^1.14.1",
+    "tslint": "^6.0.0",
+    "typescript": "^3.7.5",
+    "yarn": "^1.22.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "webpack": "webpack -d --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaifastromai/webgl-intro.git"
+  },
+  "author": "kaifas",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kaifastromai/webgl-intro/issues"
+  },
+  "homepage": "https://github.com/kaifastromai/webgl-intro#readme"
+}
