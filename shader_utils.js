@@ -39,7 +39,10 @@ class Shader {
             throw "Could not link program: " + gl.getProgramInfoLog(this.program);
         }
         this.attribs.positionAttribLocation = gl.getAttribLocation(this.program, "a_vert_pos");
-        this.uniforms.resolutionUniformLocation = gl.getUniformLocation(this.program, 'u_resolution');
+        gl.enableVertexAttribArray(this.attribs.positionAttribLocation);
+        // this.uniforms.resolutionUniformLocation = gl.getUniformLocation(this.program, 'u_resolution');
+        this.uniforms.colorLocation = gl.getUniformLocation(this.program, "u_color");
+        this.uniforms.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
     }
 }
 export { Shader };

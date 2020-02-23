@@ -1,5 +1,4 @@
 import { vec3 } from "gl-matrix";
-import { gl } from "./webgl";
 
 const x_axis = vec3.fromValues(1, 0, 0);
 const y_axis = vec3.fromValues(0, 1, 0);
@@ -28,8 +27,7 @@ async function loadShader(frag_url: string, vrtx_url: string): Promise<IShader> 
 }
 
 function resize_canvas(canvas: HTMLCanvasElement) {
-    var cssToRealPixels = window.devicePixelRatio || 1;
-    console.log("Here I am!");
+    var cssToRealPixels = 1;
     var displayWidth = Math.floor(canvas.clientWidth * cssToRealPixels);
     var displayHeight = Math.floor(canvas.clientHeight * cssToRealPixels);
     if (canvas.width != displayWidth ||

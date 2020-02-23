@@ -3,13 +3,47 @@
     body {
         background-color: rgb(44, 44, 44);
         border: 0;
+        margin: 0;
+        padding: 0;
+        border-collapse: collapse;
+
+        /* overflow: hidden; */
 
     }
 
-    canvas {
+    .slidercontainer {
+        text-align: right;
+        padding-right: 5vw;
+        padding-top: 5vh;
+
+    }
+
+    #glcanvas {
         width: 100vw;
-        height: 100vh;
+        height: 90vh;
         display: block;
+        border: 0;
+        z-index: 0;
+        margin: 0;
+        padding: 0;
+        border-collapse: collapse;
+
+
+    }
+
+    #txcanvas {
+        width: 1vw;
+        height: 1vh;
+        display: block;
+        border: 0;
+        z-index: 1;
+        border-collapse: collapse;
+    }
+
+    h1,
+    b {
+        color: white;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
     }
 </style>
 
@@ -21,10 +55,23 @@
 </head>
 
 <body>
-    <div style="position:relative;">
-        <h1>Hello WebGL2</h1>
-        <canvas id="glcanvas"></canvas>
+    <div class="slidercontainer" id="slider_container">
+        <div>
+            <b>PosX: </b>
+            <input type="range" min="0" max="6" step="0.01" value="0" class="slider" id="pos_x_slider">
+        </div>
+
+        <div style="position: relative;">
+            <b>PosY: </b>
+            <input type="range" min="1" max="1000" value="0" class="slider" id="pos_y_slider">
+        </div>
+
     </div>
+    <div style="position: absolute;">
+        <canvas id="glcanvas"></canvas>
+        <canvas id="txcanvas"></canvas>
+    </div>
+
 
     <script src='./dist/bundle.js'></script>
     </script>

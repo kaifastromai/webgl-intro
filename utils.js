@@ -19,8 +19,7 @@ async function loadShader(frag_url, vrtx_url) {
     return shader;
 }
 function resize_canvas(canvas) {
-    var cssToRealPixels = window.devicePixelRatio || 1;
-    console.log("Here I am!");
+    var cssToRealPixels = 1;
     var displayWidth = Math.floor(canvas.clientWidth * cssToRealPixels);
     var displayHeight = Math.floor(canvas.clientHeight * cssToRealPixels);
     if (canvas.width != displayWidth ||
