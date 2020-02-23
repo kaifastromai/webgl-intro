@@ -1,4 +1,5 @@
 import { initializeShader, drawScene, glcanvas } from "./webgl";
+import { vec3 } from "gl-matrix";
 function createSlider(div, name, default_val, max, min, step) {
     var n_div = document.createElement("div");
     var title = document.createElement('b');
@@ -24,17 +25,15 @@ var slider_div = document.getElementById("slider_container");
 var theta_sldr = createSlider(slider_div, "Angle: ", 0, Math.PI, 0, 0.001);
 var size_x_sldr = createSlider(slider_div, "SizeX: ", 1, 10, -10, 0.001);
 var size_y_sldr = createSlider(slider_div, "SizeY: ", 1, 10, -10, 0.001);
-var pos_x_slider = document.getElementById('pos_x_slider');
-var pos_y_slider = document.getElementById('pos_y_slider');
-pos_x_slider.max = glcanvas.width.toString();
-pos_y_slider.max = glcanvas.height.toString();
+var pos_x_slider = createSlider(slider_div, "PosX: ", 0, glcanvas.width / 2, 0, 0.01);
+var pos_y_slider = createSlider(slider_div, "PosY: ", 0, glcanvas.height / 2, 0, 0.01);
+var pos_z_slider = createSlider(slider_div, "PosZ: ", 0, 100, -100, 0.01);
 function update() {
     var theta = Number(theta_sldr.value);
-    console.log(theta);
-    drawScene(theta, [Number(size_x_sldr.value), Number(size_y_sldr.value)], [Number(pos_x_slider.value), Number(pos_y_slider.value)]);
+    drawScene(theta, vec3.fromValues(1, 1, 1), vec3.fromValues(Number(pos_x_slider.value), Number(pos_y_slider.value), Number(pos_z_slider.value)));
 }
 initializeShader().then(() => {
-    drawScene(0, [1, 1], [Number(pos_x_slider.value), Number(pos_y_slider.value)]);
+    drawScene(0, vec3.fromValues(1, 1, 1), vec3.fromValues(Number(pos_x_slider.value), Number(pos_y_slider.value), Number(pos_z_slider.value)));
     pos_x_slider.oninput = () => {
         update();
     };
@@ -48,6 +47,9 @@ initializeShader().then(() => {
         update();
     };
     size_y_sldr.oninput = () => {
+        update();
+    };
+    pos_z_slider.oninput = () => {
         update();
     };
 });
