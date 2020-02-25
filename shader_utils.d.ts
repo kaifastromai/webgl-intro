@@ -8,6 +8,8 @@ declare class Shader {
     };
     vertexText: string;
     fragmentText: string;
+    positionBuffer: WebGLBuffer;
+    colorBuffer: WebGLBuffer;
     constructor();
     initializeShaderText(vertext_url: string, fragment_url: string): Promise<void>;
     createProgram(): void;
