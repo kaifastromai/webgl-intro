@@ -4,4 +4,5 @@ declare function initializeShader(): Promise<void>;
 declare function drawScene(now: number): void;
 declare function createGeo(): void;
 declare function setColors(): void;
-export { gl, glcanvas, initializeShader, drawScene, createGeo, setColors };
+declare function setColorsLns(): void;
+export { gl, glcanvas, initializeShader, drawScene, createGeo, setColors, setColorsLns };

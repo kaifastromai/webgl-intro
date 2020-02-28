@@ -38,4 +38,5 @@ function resize_canvas(canvas: HTMLCanvasElement) {
 
     }
 }
+
 export { degreesToRadians, radiansToDegrees, loadFileAsync, loadShader, IShader, x_axis, y_axis, z_axis, resize_canvas };

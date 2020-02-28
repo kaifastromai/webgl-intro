@@ -1,4 +1,5 @@
-import { initializeShader, drawScene, glcanvas } from "./webgl";
+import { initializeShader, drawScene, glcanvas, gl } from "./webgl";
+import { vec4, vec2 } from "gl-matrix";
 function createSlider(div, name, default_val, max, min, step) {
     var n_div = document.createElement("div");
     var title = document.createElement('b');
@@ -39,5 +40,28 @@ var then = 0;
 initializeShader().then(() => {
     requestAnimationFrame(drawScene);
 });
-export { then };
+function NumberVertices(mvp, v, ctx) {
+    let num_vertices = v.length / 3;
+    for (let vertex_index = 0; vertex_index < num_vertices; vertex_index++) {
+        let offset = vertex_index * 3;
+        let p = vec4.fromValues(v[offset], v[offset + 1], v[offset + 2], 1);
+        ProjectText(p, mvp, ctx, String(vertex_index));
+    }
+}
+/*	ProjectText()
+*
+*	Given a point in modeling coordinates and an MVP, compute the screen space
+*	coordinate where that point will be after  projection through  the viewing
+*	pipeline. 'p' is produced in "normalized device coordinates" which must be
+*	converted to window coordinates by the method computing 'c'.
+*/
+function ProjectText(P, mvp, ctx, text) {
+    let p = vec4.clone(P);
+    vec4.transformMat4(p, p, mvp);
+    p[0] /= p[3];
+    p[1] /= p[3];
+    let c = vec2.fromValues((p[0] * 0.5 + 0.5) * gl.canvas.width, (p[1] * -0.5 + 0.5) * gl.canvas.height);
+    ctx.fillText(text, c[0], c[1]);
+}
+export { then, NumberVertices, tx };
 //# sourceMappingURL=app.js.map

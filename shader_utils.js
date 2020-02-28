@@ -1,5 +1,5 @@
 import { loadFileAsync } from "./utils";
-import { gl, createGeo, setColors } from "./webgl";
+import { gl } from "./webgl";
 class Shader {
     constructor() {
         this.program = null;
@@ -40,20 +40,31 @@ class Shader {
         }
         this.attribs.positionAttribLocation = gl.getAttribLocation(this.program, "a_vert_pos");
         this.attribs.colorLocation = gl.getAttribLocation(this.program, 'a_color');
-        gl.enableVertexAttribArray(this.attribs.positionAttribLocation);
         this.positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-        createGeo();
-        gl.vertexAttribPointer(this.attribs.positionAttribLocation, 3, gl.FLOAT, false, 0, 0);
-        this.colorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-        setColors();
-        gl.enableVertexAttribArray(this.attribs.colorLocation);
-        gl.vertexAttribPointer(this.attribs.colorLocation, 3, gl.UNSIGNED_BYTE, true, 0, 0);
-        // this.uniforms.resolutionUniformLocation = gl.getUniformLocation(this.program, 'u_resolution');
-        //this.uniforms.colorLocation = gl.getUniformLocation(this.program, "u_color");
-        this.uniforms.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+        // createGeo();
+        // gl.enableVertexAttribArray(this.attribs.positionAttribLocation);
+        // gl.vertexAttribPointer(this.attribs.positionAttribLocation, 3, gl.FLOAT, false, 0, 0);
+        // this.colorBuffer = gl.createBuffer();
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+        // setColors();
+        // gl.enableVertexAttribArray(this.attribs.colorLocation);
+        // gl.vertexAttribPointer(this.attribs.colorLocation, 3, gl.UNSIGNED_BYTE, true, 0, 0);
+        // //this.uniforms.colorLocation = gl.getUniformLocation(this.program, "u_color");
+        // this.uniforms.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
     }
 }
-export { Shader };
+function reloadTriple(vao, buffer, vrts, draw_mode = gl.STATIC_DRAW, attribute_index = 0) {
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.vertexAttribPointer(attribute_index, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attribute_index);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vrts), draw_mode);
+}
+function unbind() {
+    gl.bindVertexArray(null);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+export { Shader, reloadTriple, unbind };
 //# sourceMappingURL=shader_utils.js.map

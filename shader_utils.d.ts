@@ -14,4 +14,6 @@ declare class Shader {
     initializeShaderText(vertext_url: string, fragment_url: string): Promise<void>;
     createProgram(): void;
 }
-export { Shader };
+declare function reloadTriple(vao: WebGLVertexArrayObject, buffer: WebGLBuffer, vrts: Array<number>, draw_mode?: number, attribute_index?: number): void;
+declare function unbind(): void;
+export { Shader, reloadTriple, unbind };

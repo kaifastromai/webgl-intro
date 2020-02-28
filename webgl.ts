@@ -1,6 +1,9 @@
 import { Shader } from "./shader_utils";
-import { resize_canvas, z_axis } from "./utils";
+import { resize_canvas, z_axis, y_axis } from "./utils";
 import { mat4, vec3 } from "gl-matrix";
+import { NumberVertices, tx } from "./app";
+import { format } from "url";
+const PI = Math.PI;
 const glcanvas = <HTMLCanvasElement>document.getElementById('glcanvas');
 const gl = glcanvas.getContext('webgl2');
 if (!gl)
@@ -21,13 +24,21 @@ async function initializeShader() {
 
 }
 var rotAngle = 0;
+var disk_array: Array<vec3> = [];
+var stacks = 8;
+var slices = 80;
+var tris: Array<number> = [];
+var render_array: Array<number> = [];
+var temp_array: Array<number> = [];
+var lines_array: Array<number> = [];
+
 function drawScene(now: number) {
 
     //compute frameDelta
     now /= 1000;
     var frameDelta = now - then;
     then = now;
-    rotAngle += frameDelta * 2 * Math.PI;
+    rotAngle += frameDelta * Math.PI / 2;
     resize_canvas(glcanvas);
     //Tells gl how to convert from clip-space to pixels
     gl.viewport(0, 0, glcanvas.width, glcanvas.height);
@@ -47,335 +58,131 @@ function drawScene(now: number) {
     var cw = glcanvas.clientWidth;
     var p_m = mat4.create();
     var model_view = mat4.create();
-    mat4.lookAt(model_view, vec3.fromValues(200, 200, 200), vec3.fromValues(0, 0, 0), z_axis);
-    mat4.perspective(p_m, Math.PI / 8, cw / ch, 4, 400);
+    mat4.translate(model_view, model_view, [0, -5 / 2, 0]);
+    mat4.lookAt(model_view, vec3.fromValues(5, 5, 10), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+    mat4.perspective(p_m, Math.PI / 3, cw / ch, 4, 400);
     //Compute matrices
     //Translation matrix
     var central_pivot = mat4.create();
-    mat4.translate(central_pivot, central_pivot, [-150 / 2, -50, -15]);
     var m = mat4.create();
-    //mat4.translate(model_view, model_view, translate);
-    mat4.rotate(model_view, model_view, rotAngle, [0, 0, 1]);
-    console.log(frameDelta);
+    mat4.rotate(model_view, model_view, rotAngle, [0, 1, 0]);
+    //console.log(frameDelta);
     //mat4.scale(model_view, model_view, scale);
     mat4.multiply(m, p_m, model_view);
     mat4.multiply(m, m, central_pivot);
     gl.uniformMatrix4fv(shader.uniforms.matrixLocation, false, m);
     gl.uniform4f(shader.uniforms.colorLocation, 1, 1, 1, 1);
-    gl.drawArrays(gl.TRIANGLES, 0, 16 * 6);
-
-    console.log(gl.getError());
+    //gl.drawArrays(gl.TRIANGLES, 0, tris.length / 3);
+    //gl.drawArrays(gl.TRIANGLES, 0, render_array.length / 3);
+    gl.drawArrays(gl.LINES, 0, lines_array.length / 3);
+    //NumberVertices(m, tris, tx);
+    //console.log(gl.getError());
     requestAnimationFrame(drawScene);
-
 }
-
-
 //Create an 'F' from triangles
 function createGeo() {
-    gl.bufferData(
-        gl.ARRAY_BUFFER,
-        new Float32Array([
-            // left column front
-            0, 0, 0,
-            0, 150, 0,
-            30, 0, 0,
-            0, 150, 0,
-            30, 150, 0,
-            30, 0, 0,
+    var ir = 3;
+    var or = 3;
+    var ic = vec3.fromValues(0, 0, 0);
+    var oc = vec3.fromValues(0, 0, 5);
+    var theta = 2 * PI;
+    /**@param{float} dr the difference between outer and inner radius**/
+    for (let i = 0; i < slices; i++) {
+        var x = Math.cos(i * theta / (slices - 1));
+        var y = Math.sin(i * theta / (slices - 1));
 
-            // top rung front
-            30, 0, 0,
-            30, 30, 0,
-            100, 0, 0,
-            30, 30, 0,
-            100, 30, 0,
-            100, 0, 0,
+        //disk_array = [].concat(disk_array, quad(10, 10, [radius * Math.cos(i * 2 * PI / (slices - 2)), radius * Math.sin(i * 2 * PI / (slices - 2)), 0]));
+        for (let stck_c = 0; stck_c < stacks; stck_c++) {
+            var prcnt = (stck_c / stacks);
+            var rad = ir * (1 - prcnt) + or * prcnt;
+            var lerp_vec = vec3.create();
+            vec3.add(lerp_vec, vec3.lerp(lerp_vec, ic, oc, prcnt),
+                vec3.fromValues(rad * x, rad * y, 0));
+            disk_array = [].concat(disk_array, lerp_vec);
+            temp_array = [].concat(temp_array, ...lerp_vec);
 
-            // middle rung front
-            30, 60, 0,
-            30, 90, 0,
-            67, 60, 0,
-            30, 90, 0,
-            67, 90, 0,
-            67, 60, 0,
-
-            // left column back
-            0, 0, 30,
-            30, 0, 30,
-            0, 150, 30,
-            0, 150, 30,
-            30, 0, 30,
-            30, 150, 30,
-
-            // top rung back
-            30, 0, 30,
-            100, 0, 30,
-            30, 30, 30,
-            30, 30, 30,
-            100, 0, 30,
-            100, 30, 30,
-
-            // middle rung back
-            30, 60, 30,
-            67, 60, 30,
-            30, 90, 30,
-            30, 90, 30,
-            67, 60, 30,
-            67, 90, 30,
-
-            // top
-            0, 0, 0,
-            100, 0, 0,
-            100, 0, 30,
-            0, 0, 0,
-            100, 0, 30,
-            0, 0, 30,
-
-            // top rung right
-            100, 0, 0,
-            100, 30, 0,
-            100, 30, 30,
-            100, 0, 0,
-            100, 30, 30,
-            100, 0, 30,
-
-            // under top rung
-            30, 30, 0,
-            30, 30, 30,
-            100, 30, 30,
-            30, 30, 0,
-            100, 30, 30,
-            100, 30, 0,
-
-            // between top rung and middle
-            30, 30, 0,
-            30, 60, 30,
-            30, 30, 30,
-            30, 30, 0,
-            30, 60, 0,
-            30, 60, 30,
-
-            // top of middle rung
-            30, 60, 0,
-            67, 60, 30,
-            30, 60, 30,
-            30, 60, 0,
-            67, 60, 0,
-            67, 60, 30,
-
-            // right of middle rung
-            67, 60, 0,
-            67, 90, 30,
-            67, 60, 30,
-            67, 60, 0,
-            67, 90, 0,
-            67, 90, 30,
-
-            // bottom of middle rung.
-            30, 90, 0,
-            30, 90, 30,
-            67, 90, 30,
-            30, 90, 0,
-            67, 90, 30,
-            67, 90, 0,
-
-            // right of bottom
-            30, 90, 0,
-            30, 150, 30,
-            30, 90, 30,
-            30, 90, 0,
-            30, 150, 0,
-            30, 150, 30,
-
-            // bottom
-            0, 150, 0,
-            0, 150, 30,
-            30, 150, 30,
-            0, 150, 0,
-            30, 150, 30,
-            30, 150, 0,
-
-            // left side
-            0, 0, 0,
-            0, 0, 30,
-            0, 150, 30,
-            0, 0, 0,
-            0, 150, 30,
-            0, 150, 0,
-        ]),
-        gl.STATIC_DRAW);
+        }
+    }
+    trisFromQuad(disk_array);
+    linesFromQuad(disk_array);
+    render_array = lines_array;
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(render_array), gl.STATIC_DRAW);
 }
+function trisFromQuad(quads: Array<vec3>) {
+    for (let slc_c = 0; slc_c < slices - 1; slc_c++) {
+        for (let stck_c = 0; stck_c < stacks - 1; stck_c++) {
+            var slc_fctr = slc_c * stacks;
+            tris = [].concat(tris, ...quads[stacks - 1 - stck_c + slc_fctr]);
+            tris = [].concat(tris, ...quads[stacks - 2 - stck_c + slc_fctr]);
+            tris = [].concat(tris, ...quads[stacks + stacks - 2 - stck_c + slc_fctr]);
+            tris = [].concat(tris, ...quads[stacks + stacks - 2 - stck_c + slc_fctr]);
+            tris = [].concat(tris, ...quads[stacks + stacks - 1 - stck_c + slc_fctr]);
+            tris = [].concat(tris, ...quads[stacks - 1 - stck_c + slc_fctr]);
 
+        }
+    }
+}
+function linesFromQuad(quads: Array<vec3>) {
+    //Stack factor
+    let sf = stacks - 2;
+    for (let slc_c = 0; slc_c < slices - 1; slc_c++) {
+        var slc_fctr = slc_c * stacks;
+        for (let stck_c = 0; stck_c < stacks - 1; stck_c++) {
+            //First line
+            lines_array = [].concat(lines_array, ...quads[stacks - 1 - stck_c + slc_fctr]);
+            lines_array = [].concat(lines_array, ...quads[stacks - 2 - stck_c + slc_fctr]);
+            //Second line
+            lines_array = [].concat(lines_array, ...quads[stacks - 2 - stck_c + slc_fctr]);
+            lines_array = [].concat(lines_array, ...quads[stacks + stacks - 2 - stck_c + slc_fctr]);
+            //Third line
+            lines_array = [].concat(lines_array, ...quads[stacks + stacks - 2 - stck_c + slc_fctr]);
+            lines_array = [].concat(lines_array, ...quads[stacks + stacks - 1 - stck_c + slc_fctr]);
+            //Fourth Line
+            lines_array = [].concat(lines_array, ...quads[stacks + stacks - 1 - stck_c + slc_fctr]);
+            lines_array = [].concat(lines_array, ...quads[stacks - 1 - stck_c + slc_fctr]);
+            //Fifth Line
+            lines_array = [].concat(lines_array, ...quads[stacks - 1 - stck_c + slc_fctr]);
+            lines_array = [].concat(lines_array, ...quads[stacks + stacks - 2 - stck_c + slc_fctr]);
+
+        }
+    }
+}
 function setColors() {
+    var verts: number = render_array.length;
+
+    var color_array: Array<number> = [];
+    for (let i = 0; i < verts; i++) {
+        var cf = 1;//(i / (verts));
+        color_array.push(
+            // left column front
+            255 * cf, 255 * cf, 250,
+            255 * cf, 255 * cf, 250,
+            255 * cf, 255 * cf, 250,
+            120 * cf, 255 * cf, 255,
+            120 * cf, 255 * cf, 255,
+        );
+    }
+    gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(color_array), gl.STATIC_DRAW);
+}
+function setColorsLns() {
+    var verts: number = disk_array.length;
+
+    var color_array: Array<number> = [];
+    for (let i = 0; i < verts; i++) {
+        var cf = 1;//(i / (verts))
+        color_array.push(
+            // left column front
+            255 * cf, 255 * cf, 255,
+            255 * cf, 255 * cf, 255,
+            255 * cf, 255 * cf, 255,
+            255 * cf, 255 * cf, 255,
+            255 * cf, 255 * cf, 255,
+            255 * cf, 255 * cf, 255,
+        );
+    }
     gl.bufferData(
         gl.ARRAY_BUFFER,
-        new Uint8Array([
-            // left column front
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-
-            // top rung front
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-
-            // middle rung front
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-            200, 70, 120,
-
-            // left column back
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-
-            // top rung back
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-
-            // middle rung back
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-            80, 70, 200,
-
-            // top
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-            70, 200, 210,
-
-            // top rung right
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-            200, 200, 70,
-
-            // under top rung
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-            210, 100, 70,
-
-            // between top rung and middle
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-            210, 160, 70,
-
-            // top of middle rung
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-            70, 180, 210,
-
-            // right of middle rung
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-            100, 70, 210,
-
-            // bottom of middle rung.
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-            76, 210, 100,
-
-            // right of bottom
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-            140, 210, 80,
-
-            // bottom
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-            90, 130, 110,
-
-            // left side
-            150, 0, 150,
-            150, 0, 0,
-            150, 0, 150,
-            150, 0, 150,
-            150, 0, 150,
-            0, 0, 150,
-        ]),
+        new Uint8Array(color_array),
         gl.STATIC_DRAW);
 }
-// function planeArray(length: number, height: number, width: number): Array<number> {
-//     let cubeTris = [];
-//     var z_axis = [0, 0, 1];
-//     var l = length;
-//     var h = height;
-//     var w = width;
-//     var m = mat4.create();
-//     var cross_axis = vec3.create();
-//     vec3.cross(cross_axis, planarAxis, x_axis);
-//     mat4.rotate(m, m, vec3.angle(x_axis, planarAxis), cross_axis);
-//     mat4.translate(m, m, [-l / 2, -h / 2, -l / 2]);
-//     var p = vec3.create();
-//     vec3.transformMat4(p, [0, 0, 0], m);
-//     //First Triangle
-//     //mat4.scale(m, m, [2, 2, 0]);
-//     var rot_center = vec3.create();
-//     var m_rot = mat4.clone(m);
-//     mat4.translate(m_rot, m_rot, [-50, -50, 0]);
-//     vec3.transformMat4(rot_center, [0, 0, 0], m);
-
-
-//     var rotCenter = rot_center;
-//     cubeTris.push(p[0], p[1], p[2]);
-//     cubeTris.push(p[0], p[1] + h, p[2]);
-//     cubeTris.push(p[0] + l, p[1], p[2]);
-//     mat4.translate(m, m, [50, 50, 0]);
-//     mat4.rotate(m, m, -Math.PI / 2, cross_axis);
-//     vec3.transformMat4(p, rotCenter, m);
-//     cubeTris.push(p[0], p[1], p[2]);
-//     mat4.translate(m, m, [0, h, 0]);
-//     vec3.transformMat4(p, rotCenter, m);
-//     cubeTris.push(p[0], p[1], p[2]);
-//     mat4.translate(m, m, [l, 0, 0]);
-//     vec3.transformMat4(p, rotCenter, m);
-//     cubeTris.push(p[0], p[1], p[2]);
-//     return cubeTris;
-
-// }
-export { gl, glcanvas, initializeShader, drawScene, createGeo, setColors };
+export { gl, glcanvas, initializeShader, drawScene, createGeo, setColors, setColorsLns };
