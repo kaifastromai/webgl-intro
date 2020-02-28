@@ -1,6 +1,7 @@
 import { vec3, mat4, vec4 } from "gl-matrix";
-import { Shader } from "./shader_utils";
+import { Shader } from "./shader";
 import { gl } from "./webgl";
+import { reloadTriple, unbind } from "./shader_utils";
 
 class disc {
     //Number of points along the shape's arc
@@ -26,29 +27,19 @@ class disc {
     VERTEX_ATTRIB_INDEX = 0;
 
 
-    //quad array--this is an intermediary step I wish to remove from the final implementation
-    private quads: Array<vec3>;
-    private tris: Array<number>;
-    private vrtx_lines: Array<number>;
 
-    constructor(slices: number = 18, stacks: number = 0,
+    quads: Array<vec3>;
+    tris: Array<number>;
+    vrtx_lines: Array<number>;
+
+    constructor(slices: number = 18, stacks: number = 2,
         inner_radius: number = 10, outer_radius: number = 15,
         inner_center: vec3 = vec3.fromValues(0, 0, 0),
         outer_center: vec3 = vec3.fromValues(0, 0, 0), theta: number = 360) {
-        if (slices < 2) {
+        if (slices < 2 || stacks < 2) {
             throw new Error('Disc slices must be more than 2');
 
         }
-        this.initializeDisc(slices, stacks, inner_radius, outer_radius, inner_center, outer_center);
-
-
-    }
-    initializeDisc(slices: number = 18, stacks: number = 0,
-        inner_radius: number = 10, outer_radius: number = 15,
-        inner_center: vec3 = vec3.fromValues(0, 0, 0),
-        outer_center: vec3 = vec3.fromValues(0, 0, 0), theta: number = 360) {
-        if (slices < 2)
-            throw new Error('Disc slices must be more than 2');
         this.slices = slices;
         this.stacks = stacks;
         this.inner_radius = inner_radius;
@@ -56,14 +47,33 @@ class disc {
         this.inner_center = inner_center;
         this.outer_center = outer_center;
         this.theta = theta;
+        this.quads = [];
+        this.tris = [];
+        this.vrtx_lines = [];
         this.createGeo();
+    }
 
+    async initialize() {
+        await this.initializeShader();
+        this.shader.uniforms.u_mvp = gl.getUniformLocation(this.shader.program, 'u_matrix');
+        this.shader.uniforms.u_color = gl.getUniformLocation(this.shader.program, 'u_color');
+        this.InitGLLines();
+        this.InitGLTriangles();
     }
 
     async initializeShader() {
-        await this.shader.initializeShaderText('./shaders/shader.vert',
+        this.shader = new Shader();
+        await this.shader.createShader('./shaders/shader.vert',
             './shaders/shader.frag');
-        this.shader.createProgram();
+    }
+
+    regenMesh() {
+        this.quads = [];
+        this.tris = [];
+        this.vrtx_lines = [];
+        this.createGeo();
+        this.InitGLLines();
+        this.InitGLTriangles();
     }
 
     Draw(type: string = "solid", color: vec4, mvp: mat4) {
@@ -73,6 +83,7 @@ class disc {
                 break;
             case 'lines':
                 this.DrawWireframe(mvp, color);
+                break;
             default:
                 console.error("Improper type given. Must be 'solid' or 'lines'");
                 break;
@@ -80,7 +91,7 @@ class disc {
     }
     DrawSolid(mvp: mat4, color: vec4) {
         gl.useProgram(this.shader.program);
-        gl.uniformMatrix4fv(this.shader.attribs.mvp, false, mvp);
+        gl.uniformMatrix4fv(this.shader.uniforms.u_mvp, false, mvp);
         gl.uniform4fv(this.shader.uniforms.u_color, color);
         gl.bindVertexArray(this.tris_vao);
         gl.drawArrays(gl.TRIANGLES, 0, this.tris.length / 3.0);
@@ -103,7 +114,7 @@ class disc {
         this.linesFromQuad(this.quads);
     }
     private createQuads() {
-        var theta = this.theta * Math.PI / 360;
+        var theta = this.theta * Math.PI / 180;
         for (let i = 0; i < this.slices; i++) {
             var x = Math.cos(i * theta / (this.slices - 1));
             var y = Math.sin(i * theta / (this.slices - 1));
@@ -154,4 +165,26 @@ class disc {
             }
         }
     }
+
+    InitGLTriangles() {
+        this.tris_vao = gl.createVertexArray();
+        this.tris_buffer = gl.createBuffer();
+        this.ReloadGLTriangles();
+    }
+    InitGLLines() {
+        this.lns_vao = gl.createVertexArray();
+        this.lns_buffer = gl.createBuffer();
+        this.ReloadGLLines();
+    }
+    ReloadGLTriangles() {
+        reloadTriple(this.tris_vao, this.tris_buffer, this.tris, gl.DYNAMIC_DRAW, this.VERTEX_ATTRIB_INDEX);
+        unbind();
+    }
+    ReloadGLLines() {
+        reloadTriple(this.lns_vao, this.lns_buffer, this.vrtx_lines, gl.DYNAMIC_DRAW, this.VERTEX_ATTRIB_INDEX);
+        unbind();
+    }
+
+
 }
+export { disc as Disc };

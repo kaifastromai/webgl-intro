@@ -66,5 +66,19 @@ function unbind() {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 }
-export { Shader, reloadTriple, unbind };
+/**
+ * Initializes the uniforms on the solid color shader. Can be made more general later.
+ * @param shader the shader to operate on.
+ */
+function InitializeSolidColorShader(shader) {
+    gl.useProgram(shader.program);
+    shader.uniforms.u_mvp = gl.getUniformLocation(shader.program, "u_mvp");
+    shader.uniforms.u_color = gl.getUniformLocation(shader.program, "u_color");
+    gl.useProgram(null);
+    console.log('Solid shader:');
+    console.log('Program: ' + shader.program);
+    console.log('MVP handle: ' + shader.uniforms.u_mvp);
+    console.log('Color handle: ' + shader.uniforms.u_color);
+}
+export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS };
 //# sourceMappingURL=shader_utils.js.map

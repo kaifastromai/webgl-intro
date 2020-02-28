@@ -1,5 +1,11 @@
 import { mat4 } from "gl-matrix";
-declare var tx: CanvasRenderingContext2D;
+import { Disc } from "./disc";
+declare var disc: Disc;
+declare var disc2: Disc;
+declare var disc3: Disc;
+declare var disc4: Disc;
+declare var wireframe: boolean;
+declare var c_m: number;
 declare var then: number;
 declare function NumberVertices(mvp: mat4, v: Array<number>, ctx: CanvasRenderingContext2D): void;
-export { then, NumberVertices, tx };
+export { then, NumberVertices, disc, wireframe, disc2, disc3, disc4, c_m };

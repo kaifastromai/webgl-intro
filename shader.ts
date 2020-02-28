@@ -1,13 +1,11 @@
 import { loadFileAsync } from "./utils";
-import { gl, createGeo, setColors } from "./webgl";
+import { gl } from "./webgl";
 class Shader {
     program: WebGLProgram;
     uniforms?: { [k: string]: WebGLUniformLocation; };
     attribs?: { [k: string]: number; };
     vertexText: string;
     fragmentText: string;
-    vrtx_bffr: WebGLBuffer;
-    clr_bffr: WebGLBuffer;
     constructor() {
         this.program = null;
         this.uniforms = {};
@@ -63,6 +61,12 @@ class Shader {
         // // this.uniforms.resolutionUniformLocation = gl.getUniformLocation(this.program, 'u_resolution');
         // //this.uniforms.colorLocation = gl.getUniformLocation(this.program, "u_color");
         // this.uniforms.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
+    }
+
+    async createShader(vertext_url: string, fragment_url: string) {
+        await this.initializeShaderText(vertext_url, fragment_url).then(() => {
+            this.createProgram();
+        });
     }
 
 

@@ -16,4 +16,9 @@ declare class Shader {
 }
 declare function reloadTriple(vao: WebGLVertexArrayObject, buffer: WebGLBuffer, vrts: Array<number>, draw_mode?: number, attribute_index?: number): void;
 declare function unbind(): void;
-export { Shader, reloadTriple, unbind };
+/**
+ * Initializes the uniforms on the solid color shader. Can be made more general later.
+ * @param shader the shader to operate on.
+ */
+declare function InitializeSolidColorShader(shader: Shader): void;
+export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS };
