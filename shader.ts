@@ -43,24 +43,6 @@ class Shader {
         if (!success) {
             throw "Could not link program: " + gl.getProgramInfoLog(this.program);
         }
-        // this.attribs.positionAttribLocation = gl.getAttribLocation(this.program, "a_vert_pos");
-        // this.attribs.colorLocation = gl.getAttribLocation(this.program, 'a_color');
-        // this.vrtx_bffr = gl.createBuffer();
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this.vrtx_bffr);
-        // createGeo();
-        // gl.enableVertexAttribArray(this.attribs.positionAttribLocation);
-        // gl.vertexAttribPointer(this.attribs.positionAttribLocation, 3, gl.FLOAT, false, 0, 0);
-
-        // this.clr_bffr = gl.createBuffer();
-        // gl.bindBuffer(gl.ARRAY_BUFFER, this.clr_bffr);
-        // setColors();
-        // gl.enableVertexAttribArray(this.attribs.colorLocation);
-        // gl.vertexAttribPointer(this.attribs.colorLocation, 3, gl.UNSIGNED_BYTE, true, 0, 0);
-
-
-        // // this.uniforms.resolutionUniformLocation = gl.getUniformLocation(this.program, 'u_resolution');
-        // //this.uniforms.colorLocation = gl.getUniformLocation(this.program, "u_color");
-        // this.uniforms.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
     }
 
     async createShader(vertext_url: string, fragment_url: string) {
