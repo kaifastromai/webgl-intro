@@ -58,30 +58,6 @@ var then = 0;
 //             Number(pos_y_slider.value),
 //             Number(pos_z_slider.value)));
 // }
-function old_stuff() {
-    var txcanvas = <HTMLCanvasElement>document.getElementById('txcanvas');
-    txcanvas.width = txcanvas.clientWidth;
-    txcanvas.height = txcanvas.clientHeight;
-    var tx = txcanvas.getContext('2d');
-    tx.font = "40px Arial";
-    tx.fillText("WebGl Intro", 0, 0);
-    var slider_div = <HTMLDivElement>document.getElementById("slider_container");
-    var theta_sldr = createSlider(slider_div, "Rotation Speed(rad/s): ", 0, 2 * Math.PI, 0, 0.001);
-    var size_x_sldr = createSlider(slider_div, "SizeX: ", 1, 10, -10, 0.001);
-    var size_y_sldr = createSlider(slider_div, "SizeY: ", 1, 10, -10, 0.001);
-    var pos_x_slider = createSlider(slider_div, "PosX: ", 0, glcanvas.width / 2, 0, 0.01);
-    var pos_y_slider = createSlider(slider_div, "PosY: ", 0, glcanvas.height / 2, 0, 0.01);
-    var pos_z_slider = createSlider(slider_div, "PosZ: ", 0, 100, -100, 0.01);
-}
-
-function NumberVertices(mvp: mat4, v: Array<number>, ctx: CanvasRenderingContext2D) {
-    let num_vertices = v.length / 3;
-    for (let vertex_index = 0; vertex_index < num_vertices; vertex_index++) {
-        let offset = vertex_index * 3;
-        let p = vec4.fromValues(v[offset], v[offset + 1], v[offset + 2], 1);
-        ProjectText(p, mvp, ctx, String(vertex_index));
-    }
-}
 
 /*	ProjectText()
 *	
@@ -98,4 +74,4 @@ function ProjectText(P: vec4, mvp: mat4, ctx: CanvasRenderingContext2D, text: st
     let c = vec2.fromValues((p[0] * 0.5 + 0.5) * gl.canvas.width, (p[1] * -0.5 + 0.5) * gl.canvas.height);
     ctx.fillText(text, c[0], c[1]);
 }
-export { then, NumberVertices, disc, wireframe, disc2, disc3, disc4, c_m };
+export { then, disc, wireframe, disc2, disc3, disc4, c_m };
