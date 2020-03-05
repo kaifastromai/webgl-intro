@@ -1,5 +1,6 @@
 import { loadFileAsync } from "./utils";
 import { gl, createGeo, setColors } from "./webgl";
+import { vec3 } from "gl-matrix";
 class Shader {
     program: WebGLProgram;
     uniforms?: { [k: string]: WebGLUniformLocation; };
@@ -78,4 +79,12 @@ function InitializeSolidColorShader(shader: Shader) {
     console.log('MVP handle: ' + shader.uniforms.u_mvp);
     console.log('Color handle: ' + shader.uniforms.u_color);
 }
-export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS };
+/**
+ * 
+ * @param quads The array containing quad vec3 data
+ */
+function createNormalsFromQuads(quads: Array<vec3>) {
+                                  
+
+}
+export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS, createNormalsFromQuads };
