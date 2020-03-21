@@ -47,6 +47,7 @@ function drawScene(now: number) {
     mat4.multiply(m, p_m, model_view);
     if (wireframe) {
         disc.Draw('lines', vec4.fromValues(0.2, 1, 1, 1), m, model_view);
+        console.log("hello_world");
     }
 
     disc.Draw('solid', vec4.fromValues(0.2, 1, 1, 1), m, model_view);

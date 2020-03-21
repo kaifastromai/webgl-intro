@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "outDir": "./build",
         "module": "ESNext",
         "target": "ESNext",
         "watch": false,
@@ -20,6 +21,7 @@
     },
     "exclude": [
         ".git",
-        "node_modules"
+        "node_modules",
+        "build"
     ]
 }

@@ -1,4 +1,6 @@
 node_modules
 dist/bundle.js
+build/**
 *.js
 *.d.ts
+*.js.map
