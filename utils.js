@@ -28,5 +28,36 @@ function resize_canvas(canvas) {
         canvas.height = displayHeight;
     }
 }
-export { degreesToRadians, radiansToDegrees, loadFileAsync, loadShader, x_axis, y_axis, z_axis, resize_canvas };
+async function loadJSON(path) {
+    let res = await loadFileAsync(path);
+    return JSON.parse(res);
+}
+function linesFromTrisIndicies(tris_indicies) {
+    let ls_indicies = [];
+    for (let i = 0; i < tris_indicies.length / 3; i++) {
+        // i is a triangle index. index_vn are indexies of vertexes withing triangles.
+        let index_v0 = tris_indicies[i * 3 + 0];
+        let index_v1 = tris_indicies[i * 3 + 1];
+        let index_v2 = tris_indicies[i * 3 + 2];
+        // Make the line segments for drawing outlines.
+        ls_indicies.push(index_v0);
+        ls_indicies.push(index_v1);
+        ls_indicies.push(index_v1);
+        ls_indicies.push(index_v2);
+        ls_indicies.push(index_v2);
+        ls_indicies.push(index_v0);
+    }
+    return ls_indicies;
+}
+function vec3FromArray(ar) {
+    let out_vec;
+    if (ar.length < 3) {
+        throw "Too few arguments";
+    }
+    else {
+        out_vec = vec3.fromValues(ar[0], ar[1], ar[2]);
+        return out_vec;
+    }
+}
+export { degreesToRadians, radiansToDegrees, loadFileAsync, loadShader, x_axis, y_axis, z_axis, resize_canvas, loadJSON, linesFromTrisIndicies, vec3FromArray };
 //# sourceMappingURL=utils.js.map

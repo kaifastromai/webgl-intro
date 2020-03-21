@@ -1,3 +1,4 @@
+import { vec3 } from "gl-matrix";
 declare class Shader {
     program: WebGLProgram;
     uniforms?: {
@@ -21,4 +22,9 @@ declare function unbind(): void;
  * @param shader the shader to operate on.
  */
 declare function InitializeSolidColorShader(shader: Shader): void;
-export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS };
+/**
+ *
+ * @param quads The array containing quad vec3 data
+ */
+declare function createNormalsFromQuads(quads: Array<vec3>): void;
+export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS, createNormalsFromQuads };

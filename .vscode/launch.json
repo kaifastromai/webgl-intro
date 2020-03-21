@@ -5,28 +5,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "e${workspaceFolder}/c_code/a.out",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb" 
-        },
-        {
-            "name": "Launch Edge",
-            "request": "launch",
-            "type": "pwa-msedge",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
-        },
-        {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Launch Node",
+            "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
             ],

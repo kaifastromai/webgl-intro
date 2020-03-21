@@ -6,7 +6,7 @@ var disc2 = new Disc(12, 5, 2, 3, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0
 var disc3 = new Disc(15, 5, 5, 5, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 4));
 var disc4 = new Disc(15, 5, 1, 5, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 4), 270);
 disc.slices = 60;
-disc.regenMesh();
+//disc.regenMesh();
 
 var wireframe: boolean = true;
 disc.inner_radius = 1;
@@ -31,9 +31,9 @@ async function main() {
     await disc4.initialize();
     console.log(disc.shader.program);
     requestAnimationFrame(drawScene);
-
 }
 main();
+
 function createSlider(div: HTMLDivElement, name: string, default_val: number, max: number, min: number, step: number): HTMLInputElement {
     var n_div = document.createElement("div");
     var title = document.createElement('b');

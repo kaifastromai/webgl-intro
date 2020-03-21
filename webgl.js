@@ -1,7 +1,7 @@
 import { Shader } from "./shader_utils";
 import { resize_canvas } from "./utils";
 import { mat4, vec3, vec4 } from "gl-matrix";
-import { disc, wireframe, disc2, disc3, disc4, c_m } from "./app";
+import { disc, wireframe } from "./app";
 const glcanvas = document.getElementById('glcanvas');
 const gl = glcanvas.getContext('webgl2');
 if (!gl)
@@ -36,48 +36,16 @@ function drawScene(now) {
     var cw = glcanvas.clientWidth;
     var p_m = mat4.create();
     var model_view = mat4.create();
-    mat4.lookAt(model_view, vec3.fromValues(5, 5, 5), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+    mat4.lookAt(model_view, vec3.fromValues(7, 7, 7), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.perspective(p_m, Math.PI / 2, cw / ch, 4, 1000);
     var m = mat4.create();
-    mat4.rotate(model_view, model_view, rotAngle, [0, 1, 0]);
+    mat4.rotate(model_view, model_view, rotAngle, [1, 0, 1]);
     mat4.scale(model_view, model_view, [0.75, 0.75, 0.75]);
     mat4.multiply(m, p_m, model_view);
-    switch (c_m) {
-        case 0:
-            disc.Draw((() => {
-                if (wireframe)
-                    return 'lines';
-                else
-                    return 'solid';
-            })(), vec4.fromValues(1, 1, 1, 0.5), m);
-            break;
-        case 1:
-            disc2.Draw((() => {
-                if (wireframe)
-                    return 'lines';
-                else
-                    return 'solid';
-            })(), vec4.fromValues(1, 1, 1, 0.5), m);
-            break;
-        case 2:
-            disc3.Draw((() => {
-                if (wireframe)
-                    return 'lines';
-                else
-                    return 'solid';
-            })(), vec4.fromValues(1, 1, 1, 0.5), m);
-            break;
-        case 3:
-            disc4.Draw((() => {
-                if (wireframe)
-                    return 'lines';
-                else
-                    return 'solid';
-            })(), vec4.fromValues(1, 1, 1, 0.5), m);
-            break;
-        default:
-            break;
+    if (wireframe) {
+        disc.Draw('lines', vec4.fromValues(0.2, 1, 1, 1), m, model_view);
     }
+    disc.Draw('solid', vec4.fromValues(0.2, 1, 1, 1), m, model_view);
     requestAnimationFrame(drawScene);
 }
 export { gl, glcanvas, initializeShader, drawScene };
