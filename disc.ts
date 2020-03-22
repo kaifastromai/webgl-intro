@@ -1,4 +1,4 @@
-import { vec3, mat4, vec4 } from "gl-matrix";
+import { vec3, mat4, vec4, mat3 } from "gl-matrix";
 import { Shader } from "./shader";
 import { gl } from "./webgl";
 import { reloadTriple, unbind } from "./shader_utils";
@@ -44,6 +44,9 @@ class disc {
     normal_verts_raw: Array<number>;
     normal_verts_from_index: Array<number>;
     display_normals: any[];
+    normal_verts: Array<number>;
+    proc_norms: any[];
+    non_indexed_tris: any[];
     constructor(slices: number = 18, stacks: number = 2,
         inner_radius: number = 10, outer_radius: number = 15,
         inner_center: vec3 = vec3.fromValues(0, 0, 0),
@@ -67,6 +70,9 @@ class disc {
         this.normal_verts_raw = [];
         this.normal_verts_from_index = [];
         this.display_normals = [];
+        this.normal_verts = [];
+        this.proc_norms = [];
+        this.non_indexed_tris = [];
 
 
     }
@@ -77,15 +83,17 @@ class disc {
         await this.loadMeshData("./box.json");
         this.createGeo();
         await this.initializeShader();
-        this.shader.uniforms.u_mvp = gl.getUniformLocation(this.shader.program, 'u_matrix');
+        //this.shader.uniforms.u_mvp = gl.getUniformLocation(this.shader.program, 'u_matrix');
         this.shader.uniforms.u_color = gl.getUniformLocation(this.shader.program, 'u_color');
         this.shader.uniforms.u_world_view_projection = gl.getUniformLocation(this.shader.program, "u_worldViewProjection");
         this.shader.uniforms.u_world_location = gl.getUniformLocation(this.shader.program, "u_world");
         this.shader.uniforms.u_reverse_light_direction = gl.getUniformLocation(this.shader.program, 'u_reverseLightDirection');
+        this.shader.uniforms.u_nm = gl.getUniformLocation(this.shader.program, "u_nm");
         this.NORMAL_ATTRIB_INDEX = gl.getAttribLocation(this.shader.program, "a_normal");
         this.InitGLLines();
         this.InitGLTriangles();
         this.InitGLNormals();
+
     }
 
     async initializeShader() {
@@ -103,39 +111,45 @@ class disc {
     //     this.InitGLTriangles();
     // }
 
-    Draw(type: string = "solid", color: vec4, worldProjection: mat4, worldMatrix: mat4) {
+    Draw(type: string = "solid", color: vec4, p: mat4, m_v: mat4) {
         switch (type) {
             case 'solid':
-                this.DrawSolid(worldProjection, worldMatrix, color);
+                this.DrawSolid(p, m_v, color);
                 break;
             case 'lines':
-                this.DrawWireframe(worldProjection, worldMatrix, color);
+                this.DrawWireframe(p, m_v, color);
                 break;
             default:
                 console.error("Improper type given. Must be 'solid' or 'lines'");
                 break;
         }
     }
-    DrawSolid(worldProjection: mat4, worldMatrix: mat4, color: vec4) {
+    DrawSolid(p: mat4, m_v: mat4, color: vec4) {
         gl.useProgram(this.shader.program);
-        gl.uniformMatrix4fv(this.shader.uniforms.u_world_location, false, worldMatrix);
-        gl.uniformMatrix4fv(this.shader.uniforms.u_world_view_projection, false, worldProjection);
+        gl.uniformMatrix4fv(this.shader.uniforms.u_world_location, false, m_v);
+        gl.uniformMatrix4fv(this.shader.uniforms.u_world_view_projection, false, p);
         gl.uniform4fv(this.shader.uniforms.u_color, color);
-        this.light_dir = vec3.fromValues(0, -1, 0);
+        let nm = mat3.create();
+        mat3.fromMat4(nm, m_v);
+        mat3.invert(nm, nm);
+        mat3.transpose(nm, nm);
+        gl.uniformMatrix3fv(this.shader.uniforms.u_nm, false, nm);
+        this.light_dir = vec3.fromValues(-1, -1, -1);
         vec3.normalize(this.light_dir, this.light_dir);
         gl.uniform3fv(this.shader.uniforms.u_reverse_light_direction, this.light_dir);
 
         gl.bindVertexArray(this.tris_vao);
-        gl.drawElements(gl.TRIANGLES, this.tris_seg_indices.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawArrays(gl.TRIANGLES, 0, this.non_indexed_tris.length / 3);
         gl.bindVertexArray(null);
         gl.useProgram(null);
     }
 
-    DrawWireframe(worldProjection: mat4, worldMatrix: mat4, color: vec4) {
+
+    DrawWireframe(p: mat4, m_v: mat4, color: vec4) {
         gl.useProgram(this.shader.program);
-        gl.uniformMatrix4fv(this.shader.uniforms.u_world_location, false, worldMatrix);
-        gl.uniformMatrix4fv(this.shader.uniforms.u_world_view_projection, false, worldProjection);
-        this.light_dir = vec3.fromValues(0, -1, 0);
+        gl.uniformMatrix4fv(this.shader.uniforms.u_world_location, false, m_v);
+        gl.uniformMatrix4fv(this.shader.uniforms.u_world_view_projection, false, p);
+        this.light_dir = vec3.fromValues(1, 1, 1);
         vec3.normalize(this.light_dir, this.light_dir);
         gl.uniform3fv(this.shader.uniforms.u_reverse_light_direction, this.light_dir);
         gl.uniform4fv(this.shader.uniforms.u_color, color);
@@ -149,7 +163,10 @@ class disc {
         this.trisFromJson();
         this.linesFromJson();
         this.normalsFromJson();
+        this.indexedToArray(this.tris_seg_indices, this.tris);
         this.calculateDisplayNormals();
+        this.calculateNormalsFromIndexedTris(this.tris_seg_indices);
+        this.displayNormalsFromNormals(this.proc_norms);
     }
     private createQuads() {
         var theta = this.theta * Math.PI / 180;
@@ -197,6 +214,9 @@ class disc {
             let slice = this.normal_verts_raw.slice(
                 3 * this.normal_index[i],
                 3 * this.normal_index[i] + 3);
+            // slice[0] *= -1;
+            // slice[1] *= -1;
+            // slice[2] *= -1;
             this.normal_verts_from_index = [].concat(this.normal_verts_from_index,
                 ...slice);
 
@@ -226,21 +246,91 @@ class disc {
         }
     }
     private calculateDisplayNormals(length: number = 0.5) {
-        for (let i = 0; i < this.normal_verts_from_index.length / 3; i++) {
+
+        for (let i = 0; i < this.tris_seg_indices.length; i++) {
             let pos = this.tris.slice(3 * this.tris_seg_indices[i], 3 * this.tris_seg_indices[i] + 3);
             this.display_normals.push(...pos);
             // let normal: vec3 = vec3FromArray(this.normal_verts_from_index.slice(3 * this.normal_index[i],
             //     3 * this.normal_index[i] + 3));
-            let normal = vec3FromArray(this.normal_verts_from_index.slice(3 * i, 3 * i + 3));
-            vec3.normalize(normal, normal);
+            //let normal = vec3FromArray(this.normal_verts_from_index.slice(3 * i, 3 * i + 3));
+
+            let normal = vec3FromArray(this.normal_verts_raw.slice(3 * this.normal_index[i],
+                3 * this.normal_index[i] + 3));
+
             //vec3.scale(normal, normal, length);
+            this.normal_verts.push(...normal);
             vec3.add(normal, normal, pos);
             this.display_normals.push(...normal);
             // if (i == 35) {
             //     debugger;
             // }
         }
-        console.log(this.display_normals);
+        // console.log(this.display_normals);
+
+    }
+    private indexedToArray(index: Array<number>, values: Array<number>) {
+        this.non_indexed_tris = [];
+        for (let i = 0; i < index.length; i++) {
+            this.non_indexed_tris.push(...values.slice(3 * index[i], 3 * index[i] + 3));
+        }
+    }
+    private displayNormalsFromNormals(normals: Array<number>) {
+        this.display_normals = [];
+        for (let i = 0; i < normals.length / 3; i++) {
+            let pos = this.tris.slice(3 * this.tris_seg_indices[i], 3 * this.tris_seg_indices[i] + 3);
+            this.display_normals.push(...pos);
+            let normal: vec3 = vec3FromArray(normals.slice(3 * i, 3 * i + 3));
+            vec3.add(normal, normal, pos);
+            this.display_normals.push(...normal);
+
+        }
+    }
+    private triNormalFromVertex(face_id: number, vert_id: number): vec3 {
+        let face = new Array<vec3>();
+        face.push(vec3FromArray(this.tris.slice(3 * this.tris_seg_indices[3 * face_id], 3 * this.tris_seg_indices[3 * face_id] + 3)));
+        face.push(vec3FromArray(this.tris.slice(3 * this.tris_seg_indices[3 * face_id + 1], 3 * this.tris_seg_indices[3 * face_id + 1] + 3)));
+        face.push(vec3FromArray(this.tris.slice(3 * this.tris_seg_indices[3 * face_id + 2], 3 * this.tris_seg_indices[3 * face_id + 2] + 3)));
+        let v1 = face[vert_id];
+        let v2 = face[(vert_id + 1) % 3];
+        let v3 = face[(vert_id + 2) % 3];
+        let line1: vec3 = vec3.create();
+        let line2: vec3 = vec3.create();
+        vec3.subtract(line1, v2, v3);
+        vec3.subtract(line2, v3, v1);
+        let cross = vec3.create();
+        vec3.cross(cross, line1, line2);
+        // let sin_angle: number = vec3.len(cross) / (vec3.len(line1) * vec3.len(line2));
+        // vec3.scale(cross, cross, Math.asin(sin_angle));
+        return cross;//vec3.normalize(cross, cross);
+
+    }
+    private calculateNormalsFromIndexedTris(tris_index: Array<number>) {
+        //calculate face ids
+        let face_id = [];
+        for (let i = 0; i < tris_index.length / 3; i++) {
+            let v1_indx = tris_index[3 * i];
+            let v2_indx = tris_index[3 * i + 1];
+            let v3_indx = tris_index[3 * i + 2];
+            face_id.push(vec3.fromValues(v1_indx, v2_indx, v3_indx));
+
+        }
+        this.proc_norms = [];
+        for (let vert = 0; vert < tris_index.length; vert++) {
+            let v: number = tris_index[vert];
+            let N: vec3 = vec3.create();
+            for (let i = 0; i < tris_index.length / 3; i++) {
+                if (face_id[i].includes(v)) {
+                    let v_id = face_id[i].findIndex((v_in) => { return v_in == v });
+                    vec3.add(N, N, this.triNormalFromVertex(i, v_id));
+
+                }
+                //N = this.triNormalFromVertex(i, 0);
+            }
+            vec3.normalize(N, N);
+            this.proc_norms.push(...N);
+
+        }
+        //debugger;
 
     }
 
@@ -248,7 +338,7 @@ class disc {
         this.tris_vao = gl.createVertexArray();
         this.tris_buffer = gl.createBuffer();
         this.tris_seg_buffer = gl.createBuffer();
-        this.ReloadGLTriangles();
+        this.ReloadGLTriangles(false);
     }
     InitGLLines() {
         this.lns_vao = gl.createVertexArray();
@@ -261,13 +351,14 @@ class disc {
         this.ReloadGLNormals();
     }
     ReloadGLTriangles(do_index_buffer: boolean = true) {
-        reloadTriple(this.tris_vao, this.tris_buffer, this.tris, gl.DYNAMIC_DRAW, this.VERTEX_ATTRIB_INDEX);
+        reloadTriple(this.tris_vao, this.tris_buffer, this.non_indexed_tris, gl.DYNAMIC_DRAW, this.VERTEX_ATTRIB_INDEX);
         if (do_index_buffer) {
-            let uarray = new Uint16Array(this.tris_seg_indices.length);
+            reloadTriple(this.tris_vao, this.tris_buffer, this.tris, gl.DYNAMIC_DRAW, this.VERTEX_ATTRIB_INDEX);
+            // let uarray = new Uint16Array(this.tris_seg_indices.length);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.tris_seg_buffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.tris_seg_indices), gl.DYNAMIC_DRAW);
-            gl.getBufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, uarray);
-            console.log("We actually only buffered for tris: " + uarray.length);
+            // gl.getBufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, uarray);
+            // console.log("We actually only buffered for tris: " + uarray.length);
         }
         unbind();
     }
@@ -279,17 +370,17 @@ class disc {
             let uarray = new Uint16Array(this.line_seg_indicies.length);
             console.log("U Array size: " + uarray.length);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.line_seg_indicies), gl.DYNAMIC_DRAW);
-            let ar: ArrayBuffer = new ArrayBuffer(this.vrtx_lines.length * Float32Array.BYTES_PER_ELEMENT);
-            gl.getBufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, uarray);
-            console.log("We actually only buffered for lines: " + uarray.length);
+            // let ar: ArrayBuffer = new ArrayBuffer(this.vrtx_lines.length * Float32Array.BYTES_PER_ELEMENT);
+            // gl.getBufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, uarray);
+            // console.log("We actually only buffered for lines: " + uarray.length);
         }
         unbind();
     }
     ReloadGLNormals() {
-        reloadTriple(this.tris_vao, this.normal_buffer, this.normal_verts_from_index, gl.DYNAMIC_DRAW, this.NORMAL_ATTRIB_INDEX);
-        let uarray = new Float32Array(this.normal_verts_from_index.length);
-        gl.getBufferSubData(gl.ARRAY_BUFFER, 0, uarray);
-        console.log("We actually have: " + uarray.length + " in normal buffer");
+        reloadTriple(this.tris_vao, this.normal_buffer, this.normal_verts, gl.DYNAMIC_DRAW, this.NORMAL_ATTRIB_INDEX);
+        //let uarray = new Float32Array(this.normal_verts_from_index.length);
+        // gl.getBufferSubData(gl.ARRAY_BUFFER, 0, uarray);
+        //console.log("We actually have: " + uarray.length + " in normal buffer");
         unbind();
     }
 
