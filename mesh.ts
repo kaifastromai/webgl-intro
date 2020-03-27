@@ -1,7 +1,6 @@
 import { vec3, mat4, vec4, mat3 } from "gl-matrix";
 import { vec3FromArray } from "./utils";
-import * as THREE from 'node_modules/three/'
-class mesh {
+class Mesh {
     meshFromTris(tris: number[], tri_indices: Array<number>) {
 
         for (let i = 0; i < tri_indices.length / 3; i++) {
@@ -54,4 +53,4 @@ class face {
 
 }
 
-export { mesh }
+export { Mesh }
