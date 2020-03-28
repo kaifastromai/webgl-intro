@@ -1,5 +1,5 @@
 import { loadFileAsync } from "./utils";
-import { gl, createGeo, setColors } from "./webgl";
+import { gl } from "./webgl";
 import { vec3 } from "gl-matrix";
 class Shader {
     program: WebGLProgram;
@@ -60,6 +60,28 @@ function reloadTriple(vao: WebGLVertexArrayObject, buffer: WebGLBuffer, vrts: Ar
     gl.enableVertexAttribArray(attribute_index);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vrts), draw_mode);
 }
+function reloadImage(vao: WebGLVertexArrayObject, texture_coord_buffer:
+    WebGLBuffer, attribute_index = 0, texture_coords: Array<number>,
+    draw_mode = gl.STATIC_DRAW, image: HTMLImageElement) {
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, texture_coord_buffer);
+    gl.vertexAttribPointer(attribute_index, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(attribute_index);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texture_coords), draw_mode);
+
+    let texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + 0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    let mipLevel = 0;
+    let internalFormat = gl.RGBA;
+    let srcFormat = gl.RGBA;
+    let srcType = gl.UNSIGNED_BYTE;
+    gl.texImage2D(gl.TEXTURE_2D, mipLevel, internalFormat, srcFormat, srcType, image);
+}
 function unbind() {
     gl.bindVertexArray(null);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
@@ -84,7 +106,7 @@ function InitializeSolidColorShader(shader: Shader) {
  * @param quads The array containing quad vec3 data
  */
 function createNormalsFromQuads(quads: Array<vec3>) {
-                                  
+
 
 }
-export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS, createNormalsFromQuads };
+export { Shader, reloadTriple, unbind, InitializeSolidColorShader as ISCS, createNormalsFromQuads, reloadImage };

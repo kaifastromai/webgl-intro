@@ -6,6 +6,7 @@ const z_axis = vec3.fromValues(0, 0, 1);
 declare global {
 
 }
+
 declare global {
     interface Number {
         method(): String;
