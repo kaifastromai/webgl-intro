@@ -1,7 +1,7 @@
 import { vec3, mat4, vec4, mat3 } from "gl-matrix";
 import { Shader } from "./shader";
 import { gl } from "./webgl";
-import { reloadTriple, unbind } from "./shader_utils";
+import { reloadTriple, unbind, reloadImage } from "./shader_utils";
 import { loadJSON, linesFromTrisIndicies, vec3FromArray } from "./utils";
 
 class disc {
@@ -33,6 +33,7 @@ class disc {
     tris_seg_buffer: WebGLBuffer;
     VERTEX_ATTRIB_INDEX = 0;
     NORMAL_ATTRIB_INDEX = 1;
+    TEXTURE_ATTRIB_INDEX = 2;
     private json_mesh_data: any;
 
     quads: Array<vec3>;
@@ -47,6 +48,11 @@ class disc {
     normal_verts: Array<number>;
     proc_norms: any[];
     non_indexed_tris: any[];
+    texels: Array<number>;
+    texel_indices: any;
+    non_indexed_texels: any[];
+    image: HTMLImageElement;
+    texture_buffer: WebGLBuffer;
     constructor(slices: number = 18, stacks: number = 2,
         inner_radius: number = 10, outer_radius: number = 15,
         inner_center: vec3 = vec3.fromValues(0, 0, 0),
@@ -73,26 +79,41 @@ class disc {
         this.normal_verts = [];
         this.proc_norms = [];
         this.non_indexed_tris = [];
+        this.texels = [];
+        this.texel_indices = [];
+        this.non_indexed_texels = [];
+        this.image = new Image();
+
 
 
     }
     async loadMeshData(path: string) {
         this.json_mesh_data = await loadJSON(path);
     }
+    async loadImage() {
+        this.image.onload = () => {
+            return Promise;
+        }
+    }
     async initialize() {
         await this.loadMeshData("./box.json");
         this.createGeo();
         await this.initializeShader();
+        this.image.src = "./shaders/textures/black_leather.jpg";
+        await this.loadImage();
+
         //this.shader.uniforms.u_mvp = gl.getUniformLocation(this.shader.program, 'u_matrix');
         this.shader.uniforms.u_color = gl.getUniformLocation(this.shader.program, 'u_color');
         this.shader.uniforms.u_world_view_projection = gl.getUniformLocation(this.shader.program, "u_worldViewProjection");
         this.shader.uniforms.u_world_location = gl.getUniformLocation(this.shader.program, "u_world");
         this.shader.uniforms.u_reverse_light_direction = gl.getUniformLocation(this.shader.program, 'u_reverseLightDirection');
         this.shader.uniforms.u_nm = gl.getUniformLocation(this.shader.program, "u_nm");
+        this.shader.uniforms.u_image = gl.getUniformLocation(this.shader.program, "u_image");
         this.NORMAL_ATTRIB_INDEX = gl.getAttribLocation(this.shader.program, "a_normal");
         this.InitGLLines();
         this.InitGLTriangles();
         this.InitGLNormals();
+        this.InitGLTextures();
 
     }
 
@@ -129,6 +150,7 @@ class disc {
         gl.uniformMatrix4fv(this.shader.uniforms.u_world_location, false, m_v);
         gl.uniformMatrix4fv(this.shader.uniforms.u_world_view_projection, false, p);
         gl.uniform4fv(this.shader.uniforms.u_color, color);
+        gl.uniform1i(this.shader.uniforms.u_image, 0);
         let nm = mat3.create();
         mat3.fromMat4(nm, m_v);
         mat3.invert(nm, nm);
@@ -163,7 +185,9 @@ class disc {
         this.trisFromJson();
         this.linesFromJson();
         this.normalsFromJson();
-        this.indexedToArray(this.tris_seg_indices, this.tris);
+        this.texelsFromJson();
+        this.indexedToArray({ index: this.tris_seg_indices, values: this.tris, non_index_array: this.non_indexed_tris, span: 3 });
+        this.indexedToArray({ index: this.texel_indices, values: this.texels, non_index_array: this.non_indexed_texels, span: 2 })
         this.calculateDisplayNormals();
         this.calculateNormalsFromIndexedTris(this.tris_seg_indices);
         this.displayNormalsFromNormals(this.proc_norms);
@@ -200,6 +224,11 @@ class disc {
     private trisFromJson() {
         this.tris = this.json_mesh_data.meshes.box.vertices;
         this.tris_seg_indices = this.json_mesh_data.meshes.box.v_index;
+
+    }
+    private texelsFromJson() {
+        this.texels = this.json_mesh_data.meshes.box.textures;
+        this.texel_indices = this.json_mesh_data.meshes.box.t_index;
     }
     private linesFromJson() {
         this.vrtx_lines = this.json_mesh_data.meshes.box.vertices;
@@ -268,10 +297,12 @@ class disc {
         // console.log(this.display_normals);
 
     }
-    private indexedToArray(index: Array<number>, values: Array<number>) {
-        this.non_indexed_tris = [];
+    private indexedToArray({ index, values, non_index_array, span }: {
+        index: Array<number>; values: Array<number>;
+        non_index_array: Array<number>; span: number;
+    }) {
         for (let i = 0; i < index.length; i++) {
-            this.non_indexed_tris.push(...values.slice(3 * index[i], 3 * index[i] + 3));
+            non_index_array.push(...values.slice(span * index[i], span * index[i] + span));
         }
     }
     private displayNormalsFromNormals(normals: Array<number>) {
@@ -349,6 +380,15 @@ class disc {
     InitGLNormals() {
         this.normal_buffer = gl.createBuffer();
         this.ReloadGLNormals();
+    }
+    InitGLTextures() {
+        this.texture_buffer = gl.createBuffer();
+        this.ReloadGLTextures();
+
+    }
+    ReloadGLTextures() {
+        reloadImage(this.tris_vao, this.texture_buffer, this.TEXTURE_ATTRIB_INDEX, this.non_indexed_texels, gl.STATIC_DRAW, this.image);
+        unbind();
     }
     ReloadGLTriangles(do_index_buffer: boolean = true) {
         reloadTriple(this.tris_vao, this.tris_buffer, this.non_indexed_tris, gl.DYNAMIC_DRAW, this.VERTEX_ATTRIB_INDEX);

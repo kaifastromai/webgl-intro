@@ -2,6 +2,7 @@
 
 layout(location=0)in vec4 a_vert_pos;
 layout(location=1) in vec3 a_normal;
+layout(location=2)in vec2 a_textCord;
 //layout(location=1)in vec4 a_color;
 uniform mat4 u_worldViewProjection;
 uniform mat4 u_world;
@@ -10,6 +11,7 @@ uniform mat4 u_world;
 //out vec4 v_color;
 uniform mat3 u_nm;
 out vec3 v_lighting;
+out vec2 v_textCord;
 
 //all shaders have main func
 void main(void)
@@ -24,6 +26,7 @@ void main(void)
 
     v_lighting=ambientLight+(dirLightColor*directional);
     //v_lighting=normalize(a_normal);
+    v_textCord=a_textCord;
 
    // v_color=
 }

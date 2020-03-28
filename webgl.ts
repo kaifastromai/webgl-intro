@@ -1,7 +1,30 @@
 import { Shader } from "./shader_utils";
-import { resize_canvas, z_axis, y_axis } from "./utils";
-import { mat4, vec3, vec4 } from "gl-matrix";
-import { disc, wireframe, disc2, disc3, disc4, c_m } from "./app";
+import { resize_canvas } from "./utils";
+import { mat4, vec4, quat } from "gl-matrix";
+import { disc, wireframe, scale } from "./app";
+import * as CANNON from 'cannon'
+
+var world = new CANNON.World();
+world.gravity.set(0, -9.81, 0);
+
+var boxBody = new CANNON.Body({ mass: 5, position: new CANNON.Vec3(0, 0, 0), shape: new CANNON.Box(new CANNON.Vec3(5, 5, 4)) });
+world.addBody(boxBody);
+
+var orientation = new CANNON.Quaternion();
+orientation.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), Math.PI / 2);
+var groundBody = new CANNON.Body({
+    mass: 0, position: new CANNON.Vec3(0, -10, 0)
+})
+var groundShape = new CANNON.Plane()
+groundBody.addShape(groundShape);
+groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+world.addBody(groundBody);
+
+var fixedTimeStep = 1.0 / 60.0;
+
+var maxSubSteps = 3;
+
+
 const glcanvas = <HTMLCanvasElement>document.getElementById('glcanvas');
 const gl = glcanvas.getContext('webgl2');
 if (!gl)
@@ -28,10 +51,12 @@ function drawScene(now: number) {
     then = now;
     rotAngle += frameDelta * Math.PI / 2;
     resize_canvas(glcanvas);
+    world.step(fixedTimeStep, frameDelta, maxSubSteps);
+    console.log("Box position: " + boxBody.position);
     //Tells gl how to convert from clip-space to pixels
     gl.viewport(0, 0, glcanvas.width, glcanvas.height);
     gl.enable(gl.DEPTH_TEST);
-    gl.frontFace(gl.CCW);
+    gl.frontFace(gl.CW);
     //gl.enable(gl.CULL_FACE)
     //Clear the canvas
     gl.clearColor(0, 0, 0, 0);
@@ -49,10 +74,16 @@ function drawScene(now: number) {
     let m_v = mat4.create();
     /**@param m_v_p the model view projection matrix*/
     let m_v_p = mat4.create();
-    mat4.perspective(p, 2 * Math.PI / 3, cw / ch, 1, 2000);
-    mat4.lookAt(v, [7, 7, 7], [0, 0, 0], [0, 1, 0]);
+    let q = quat.create();
+    mat4.perspective(p, Math.PI / 3, cw / ch, 1, 2000);
+    mat4.lookAt(v, [3 * scale, 3 * scale, 3 * scale], [0, 0, 0], [0, 1, 0]);
 
-    mat4.rotateY(m, m, rotAngle / 4);
+    quat.rotateY(q, q, rotAngle / 4);
+    //mat4.rotateY(m, m, rotAngle / 4);
+    let rot = mat4.create();
+    mat4.fromQuat(rot, q);
+    mat4.translate(m, m, [boxBody.position.x, boxBody.position.y, boxBody.position.z]);
+    mat4.multiply(m, m, rot);
     // mat4.rotateX(m, m, Math.PI / 4);
     // mat4.rotateZ(m, m, Math.PI / 4);
     mat4.multiply(m_v, v, m);

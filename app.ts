@@ -7,7 +7,11 @@ var disc3 = new Disc(15, 5, 5, 5, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0
 var disc4 = new Disc(15, 5, 1, 5, vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, 4), 270);
 disc.slices = 60;
 //disc.regenMesh();
-
+var scale = 1;
+glcanvas.onwheel = (event) => {
+    event.preventDefault();
+    scale += event.deltaY * -0.001;
+}
 var wireframe: boolean = true;
 disc.inner_radius = 1;
 disc.outer_radius = 4;
@@ -74,4 +78,4 @@ function ProjectText(P: vec4, mvp: mat4, ctx: CanvasRenderingContext2D, text: st
     let c = vec2.fromValues((p[0] * 0.5 + 0.5) * gl.canvas.width, (p[1] * -0.5 + 0.5) * gl.canvas.height);
     ctx.fillText(text, c[0], c[1]);
 }
-export { then, disc, wireframe, disc2, disc3, disc4, c_m };
+export { then, disc, wireframe, disc2, disc3, disc4, c_m, scale };
