@@ -11,7 +11,7 @@
     "@types/node-static": "^0.7.3",
     "@types/serve-static": "^1.13.3",
     "esm": "^3.2.25",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "finalhandler": "^1.1.2",
     "gl-matrix": "^3.2.1",
     "node": "^13.8.0",
